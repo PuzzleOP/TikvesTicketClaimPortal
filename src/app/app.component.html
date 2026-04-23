@@ -1,0 +1,25 @@
+<div class="app-shell">
+  <header class="shell-header">
+    <a class="brand-block" routerLink="/claim">
+      <span class="brand-mark">TK</span>
+      <span class="brand-copy">
+        <strong>{{ i18n.t('brand.title') }}</strong>
+        <small>{{ i18n.t('brand.subtitle') }}</small>
+      </span>
+    </a>
+
+    <nav class="shell-nav">
+      <a routerLink="/claim" routerLinkActive="active">{{ i18n.t('nav.claim') }}</a>
+      <a *ngIf="session.hasSession()" routerLink="/tickets" routerLinkActive="active">{{ i18n.t('nav.tickets') }}</a>
+    </nav>
+
+    <div class="lang-switch">
+      <button type="button" [class.active]="i18n.language() === 'en'" (click)="setLanguage('en')">EN</button>
+      <button type="button" [class.active]="i18n.language() === 'mk'" (click)="setLanguage('mk')">MK</button>
+    </div>
+  </header>
+
+  <main class="shell-main">
+    <router-outlet></router-outlet>
+  </main>
+</div>

@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;700;800&display=swap');
+
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --color-ink: #f5f0e2;
+  --color-ink-soft: rgba(245, 240, 226, 0.72);
+  --color-gold: #c8a669;
+  --color-night: #08101c;
+  --color-plum: #251327;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--color-ink);
+  background:
+    radial-gradient(circle at top left, rgba(200, 166, 105, 0.18), transparent 24%),
+    radial-gradient(circle at right 20%, rgba(24, 55, 68, 0.55), transparent 26%),
+    linear-gradient(135deg, var(--color-night), var(--color-plum) 54%, #0a1725);
+  background-attachment: fixed;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+img {
+  max-width: 100%;
+}
+
+::selection {
+  background: rgba(200, 166, 105, 0.4);
+}

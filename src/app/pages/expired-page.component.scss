@@ -1,0 +1,46 @@
+:host {
+  display: grid;
+}
+
+.expired-card {
+  position: relative;
+  overflow: hidden;
+  max-width: 720px;
+  margin: 8vh auto 0;
+  padding: 36px;
+  border-radius: 30px;
+  border: 1px solid rgba(200, 166, 105, 0.24);
+  background: rgba(12, 18, 32, 0.8);
+  text-align: center;
+}
+
+.expired-card h1 {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+}
+
+.expired-card p {
+  max-width: 48ch;
+  margin: 0 auto 22px;
+  color: var(--color-ink-soft);
+  line-height: 1.8;
+}
+
+.expired-card a {
+  display: inline-block;
+  padding: 14px 20px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-gold), #f6d38b);
+  color: #22160b;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.expired-glow {
+  position: absolute;
+  inset: -80px auto auto -80px;
+  width: 220px;
+  height: 220px;
+  background: radial-gradient(circle, rgba(200, 166, 105, 0.28), transparent 70%);
+}

@@ -1,0 +1,102 @@
+<section class="claim-layout">
+  <div class="claim-panel">
+    <div class="panel-kicker">{{ i18n.t('claim.kicker') }}</div>
+    <h1>{{ i18n.t('claim.title') }}</h1>
+    <p class="panel-copy">{{ i18n.t('claim.description') }}</p>
+
+    <div class="step-strip">
+      <div class="step" [class.active]="stage() === 'details'">
+        <span>01</span>
+        <strong>{{ i18n.t('claim.step.details') }}</strong>
+      </div>
+      <div class="step" [class.active]="stage() === 'verify'">
+        <span>02</span>
+        <strong>{{ i18n.t('claim.step.verify') }}</strong>
+      </div>
+    </div>
+
+    <form class="claim-form" [formGroup]="form" (ngSubmit)="stage() === 'details' ? submitDetails() : verifyCode()">
+      <ng-container *ngIf="stage() === 'details'; else verifyStage">
+        <label class="field">
+          <span class="field-label">{{ text('claim.form.firstName', 'First name') }}</span>
+          <input type="text" formControlName="firstName" autocomplete="given-name" [placeholder]="text('claim.form.firstName', 'First name')" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">{{ text('claim.form.lastName', 'Last name') }}</span>
+          <input type="text" formControlName="lastName" autocomplete="family-name" [placeholder]="text('claim.form.lastName', 'Last name')" />
+        </label>
+
+        <label class="field">
+          <span class="field-label">{{ text('claim.form.phone', 'Phone number') }}</span>
+          <input type="tel" formControlName="phone" autocomplete="tel" [placeholder]="text('claim.form.phone', 'Phone number')" />
+          <small>{{ text('claim.form.phoneHint', 'Digits only are stored after verification.') }}</small>
+        </label>
+
+        <label class="field field-full">
+          <span class="field-label">{{ text('claim.form.email', 'Email address') }}</span>
+          <input type="email" formControlName="email" autocomplete="email" [placeholder]="text('claim.form.email', 'Email address')" />
+          <small>{{ text('claim.form.emailHint', 'Use the same email address that received the invite bundle.') }}</small>
+        </label>
+
+        <button class="primary-button" type="submit" [disabled]="isSubmitting()">
+          <span>{{ isSubmitting() ? text('claim.form.submit', 'Send verification code') + '...' : text('claim.form.submit', 'Send verification code') }}</span>
+        </button>
+      </ng-container>
+
+      <ng-template #verifyStage>
+        <div class="verify-banner">
+          <h2>{{ i18n.t('claim.form.sentHeadline') }}</h2>
+          <p>{{ i18n.t('claim.form.sentBody', { email: savedPayload()?.email ?? '' }) }}</p>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <span>{{ text('claim.form.firstName', 'First name') }}</span>
+            <strong>{{ savedPayload()?.firstName }}</strong>
+          </div>
+          <div>
+            <span>{{ text('claim.form.lastName', 'Last name') }}</span>
+            <strong>{{ savedPayload()?.lastName }}</strong>
+          </div>
+          <div>
+            <span>{{ text('claim.form.phone', 'Phone number') }}</span>
+            <strong>{{ savedPayload()?.phone }}</strong>
+          </div>
+          <div>
+            <span>{{ text('claim.form.email', 'Email address') }}</span>
+            <strong>{{ savedPayload()?.email }}</strong>
+          </div>
+        </div>
+
+        <label class="field field-full">
+          <span class="field-label">{{ text('claim.form.code', 'Verification code') }}</span>
+          <input type="text" inputmode="numeric" formControlName="code" maxlength="6" autocomplete="one-time-code" [placeholder]="text('claim.form.code', 'Verification code')" />
+        </label>
+
+        <div class="button-row">
+          <button class="secondary-button" type="button" (click)="backToDetails()">{{ text('claim.form.back', 'Edit details') }}</button>
+          <button class="ghost-button" type="button" [disabled]="resendSeconds() > 0" (click)="resendCode()">{{ resendLabel() }}</button>
+          <button class="primary-button" type="submit" [disabled]="isVerifying()">
+            <span>{{ isVerifying() ? text('claim.form.verify', 'Confirm and open tickets') + '...' : text('claim.form.verify', 'Confirm and open tickets') }}</span>
+          </button>
+        </div>
+      </ng-template>
+
+      <p class="form-error" *ngIf="errorMessage()">{{ errorMessage() }}</p>
+    </form>
+  </div>
+
+  <aside class="claim-aside">
+    <div class="aside-card">
+      <div class="aside-glow"></div>
+      <h2>{{ i18n.t('claim.sidebar.title') }}</h2>
+      <p>{{ i18n.t('claim.sidebar.body') }}</p>
+      <ul>
+        <li>{{ i18n.t('claim.sidebar.pointOne') }}</li>
+        <li>{{ i18n.t('claim.sidebar.pointTwo') }}</li>
+        <li>{{ i18n.t('claim.sidebar.pointThree') }}</li>
+      </ul>
+    </div>
+  </aside>
+</section>

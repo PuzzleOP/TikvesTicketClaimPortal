@@ -1,0 +1,94 @@
+<section class="wallet-shell">
+  <header class="wallet-hero">
+    <div>
+      <div class="hero-kicker">{{ i18n.t('tickets.kicker') }}</div>
+      <h1>{{ i18n.t('tickets.title') }}</h1>
+      <p>{{ i18n.t('tickets.subtitle') }}</p>
+    </div>
+    <div class="hero-actions">
+      <div class="identity" *ngIf="session.profile() as profile">
+        <strong>{{ profile.name || profile.email }}</strong>
+        <span>{{ profile.email }}</span>
+      </div>
+      <button class="signout-button" type="button" (click)="signOut()">{{ i18n.t('nav.signOut') }}</button>
+    </div>
+  </header>
+
+  <div class="wallet-state" *ngIf="loading()">{{ i18n.t('tickets.loading') }}</div>
+
+  <ng-container *ngIf="!loading()">
+    <div class="wallet-state" *ngIf="session.tickets().length === 0">{{ i18n.t('tickets.empty') }}</div>
+    <p class="wallet-message success" *ngIf="emailStatusMessage()">{{ emailStatusMessage() }}</p>
+    <p class="wallet-message error" *ngIf="emailErrorMessage()">{{ emailErrorMessage() }}</p>
+
+    <section class="ticket-section" *ngIf="activeGroups().length > 0">
+      <div class="section-heading">
+        <h2>{{ i18n.t('tickets.active') }}</h2>
+      </div>
+
+      <div class="event-group" *ngFor="let group of activeGroups()">
+        <div class="group-header">
+          <div>
+            <h3>{{ group.eventName }}</h3>
+            <p>{{ formatEventWindow(group) }}</p>
+          </div>
+          <div class="group-actions">
+            <button class="email-button" type="button" [disabled]="isSendingEvent(group.eventId)" (click)="sendEventTicketsToEmail(group)">
+              {{ isSendingEvent(group.eventId) ? i18n.t('tickets.sendingToEmail') : i18n.t('tickets.sendToEmail') }}
+            </button>
+            <span class="group-count">{{ group.tickets.length }}</span>
+          </div>
+        </div>
+
+        <div class="ticket-grid">
+          <article class="ticket-card" *ngFor="let ticket of group.tickets">
+            <div class="ticket-copy">
+              <span>{{ i18n.t('tickets.assignment') }}</span>
+              <strong>{{ ticket.assignmentSummary || 'General access' }}</strong>
+              <span>{{ i18n.t('tickets.status') }}</span>
+              <strong>{{ localizeStatus(ticket.status) }}</strong>
+              <span>{{ i18n.t('tickets.reference') }}</span>
+              <strong>{{ ticket.hash }}</strong>
+            </div>
+            <div class="ticket-qr">
+              <img [src]="qrSource(ticket)" [alt]="ticket.hash" />
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="ticket-section cancelled" *ngIf="cancelledGroups().length > 0">
+      <div class="section-heading">
+        <h2>{{ i18n.t('tickets.cancelled') }}</h2>
+        <p>{{ i18n.t('tickets.cancelledBlurb') }}</p>
+      </div>
+
+      <div class="event-group" *ngFor="let group of cancelledGroups()">
+        <div class="group-header">
+          <div>
+            <h3>{{ group.eventName }}</h3>
+            <p>{{ formatEventWindow(group) }}</p>
+          </div>
+          <span class="group-count">{{ group.tickets.length }}</span>
+        </div>
+
+        <div class="ticket-grid">
+          <article class="ticket-card cancelled-card" *ngFor="let ticket of group.tickets">
+            <div class="ticket-copy">
+              <span>{{ i18n.t('tickets.assignment') }}</span>
+              <strong>{{ ticket.assignmentSummary || 'General access' }}</strong>
+              <span>{{ i18n.t('tickets.status') }}</span>
+              <strong>{{ localizeStatus(ticket.status) }}</strong>
+              <span>{{ i18n.t('tickets.reference') }}</span>
+              <strong>{{ ticket.hash }}</strong>
+            </div>
+            <div class="ticket-qr">
+              <img [src]="qrSource(ticket)" [alt]="ticket.hash" />
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+</section>

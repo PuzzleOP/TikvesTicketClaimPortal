@@ -1,0 +1,11 @@
+import { CanActivateFn, Router } from '@angular/router';
+import { inject } from '@angular/core';
+
+import { SessionService } from '../services/session.service';
+
+export const sessionGuard: CanActivateFn = () => {
+  const session = inject(SessionService);
+  const router = inject(Router);
+
+  return session.hasSession() ? true : router.createUrlTree(['/claim']);
+};
