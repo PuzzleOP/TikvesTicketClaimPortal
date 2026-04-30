@@ -3,10 +3,30 @@ export interface ClaimStartPayload {
   lastName: string;
   phone: string;
   email: string;
+  registrationAnswers?: ClaimRegistrationAnswer[];
 }
 
 export interface ClaimVerifyPayload extends ClaimStartPayload {
   code: string;
+}
+
+export interface ClaimRegistrationQuestion {
+  key: string;
+  label: string;
+  type: 'text' | 'phone' | 'email' | 'dropdown' | 'checkbox' | 'consent' | 'number';
+  required: boolean;
+  helpText?: string | null;
+  options?: string[];
+  sortOrder?: number | null;
+}
+
+export interface ClaimRegistrationAnswer {
+  key: string;
+  value: string;
+}
+
+export interface ClaimRegistrationFormResponse {
+  fields: ClaimRegistrationQuestion[];
 }
 
 export interface ClaimAuthResponse {

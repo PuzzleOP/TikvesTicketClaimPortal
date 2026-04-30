@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { ClaimAuthResponse, ClaimStartPayload, ClaimVerifyPayload } from '../models/claim.models';
+import { ClaimAuthResponse, ClaimRegistrationFormResponse, ClaimStartPayload, ClaimVerifyPayload } from '../models/claim.models';
 import { AttendancesResponse, AuthUserProfile, SendEventTicketsEmailResponse } from '../models/ticket.models';
 
 @Injectable({ providedIn: 'root' })
@@ -13,6 +13,13 @@ export class TicketClaimApiService {
 
   startClaim(payload: ClaimStartPayload): Observable<void> {
     return this.http.post<void>(`${this.apiBaseUrl}/api/v1.0/tikves/public/ticket-claim/start`, payload);
+  }
+
+  loadRegistrationForm(email: string): Observable<ClaimRegistrationFormResponse> {
+    return this.http.post<ClaimRegistrationFormResponse>(
+      `${this.apiBaseUrl}/api/v1.0/tikves/public/ticket-claim/form`,
+      { email }
+    );
   }
 
   verifyClaim(payload: ClaimVerifyPayload): Observable<ClaimAuthResponse> {

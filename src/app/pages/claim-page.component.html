@@ -35,9 +35,64 @@
 
         <label class="field field-full">
           <span class="field-label">{{ text('claim.form.email', 'Email address') }}</span>
-          <input type="email" formControlName="email" autocomplete="email" [placeholder]="text('claim.form.email', 'Email address')" />
+          <input type="email" formControlName="email" autocomplete="email" [placeholder]="text('claim.form.email', 'Email address')" (blur)="loadRegistrationForm()" />
           <small>{{ text('claim.form.emailHint', 'Use the same email address that received the invite bundle.') }}</small>
         </label>
+
+        <div class="registration-loading" *ngIf="registrationLoading()">
+          Loading event registration fields...
+        </div>
+
+        <ng-container *ngFor="let field of registrationFields()">
+          <label class="field" [class.field-full]="field.type === 'consent' || field.type === 'checkbox'">
+            <span class="field-label">
+              {{ field.label }}<span *ngIf="field.required"> *</span>
+            </span>
+
+            <ng-container [ngSwitch]="field.type">
+              <select
+                *ngSwitchCase="'dropdown'"
+                [ngModel]="registrationValue(field.key)"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="setRegistrationValue(field.key, $event)"
+              >
+                <option value="">Select...</option>
+                <option *ngFor="let option of field.options || []" [value]="option">{{ option }}</option>
+              </select>
+
+              <label *ngSwitchCase="'checkbox'" class="checkbox-field">
+                <input
+                  type="checkbox"
+                  [ngModel]="isChecked(field.key)"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="setRegistrationValue(field.key, $event)"
+                />
+                <span>{{ field.helpText || field.label }}</span>
+              </label>
+
+              <label *ngSwitchCase="'consent'" class="checkbox-field">
+                <input
+                  type="checkbox"
+                  [ngModel]="isChecked(field.key)"
+                  [ngModelOptions]="{ standalone: true }"
+                  (ngModelChange)="setRegistrationValue(field.key, $event)"
+                />
+                <span>{{ field.helpText || field.label }}</span>
+              </label>
+
+              <input
+                *ngSwitchDefault
+                [type]="field.type === 'number' ? 'number' : (field.type === 'email' ? 'email' : (field.type === 'phone' ? 'tel' : 'text'))"
+                [ngModel]="registrationValue(field.key)"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="setRegistrationValue(field.key, $event)"
+                [placeholder]="field.label"
+              />
+            </ng-container>
+
+            <small *ngIf="field.helpText && field.type !== 'checkbox' && field.type !== 'consent'">{{ field.helpText }}</small>
+          </label>
+        </ng-container>
 
         <button class="primary-button" type="submit" [disabled]="isSubmitting()">
           <span>{{ isSubmitting() ? text('claim.form.submit', 'Send verification code') + '...' : text('claim.form.submit', 'Send verification code') }}</span>
@@ -66,6 +121,10 @@
           <div>
             <span>{{ text('claim.form.email', 'Email address') }}</span>
             <strong>{{ savedPayload()?.email }}</strong>
+          </div>
+          <div *ngFor="let field of registrationFields()">
+            <span>{{ field.label }}</span>
+            <strong>{{ registrationValue(field.key) || '-' }}</strong>
           </div>
         </div>
 

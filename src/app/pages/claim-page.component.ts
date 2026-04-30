@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { ClaimStartPayload } from '../core/models/claim.models';
+import { ClaimRegistrationQuestion, ClaimStartPayload } from '../core/models/claim.models';
 import { I18nService } from '../core/services/i18n.service';
 import { SessionService } from '../core/services/session.service';
 import { TicketClaimApiService } from '../core/services/ticket-claim-api.service';
@@ -12,7 +13,7 @@ import { TicketClaimApiService } from '../core/services/ticket-claim-api.service
 @Component({
   selector: 'app-claim-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './claim-page.component.html',
   styleUrls: ['./claim-page.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -30,6 +31,10 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
   readonly errorMessage = signal<string | null>(null);
   readonly isSubmitting = signal(false);
   readonly isVerifying = signal(false);
+  readonly registrationLoading = signal(false);
+  readonly registrationFields = signal<ClaimRegistrationQuestion[]>([]);
+  readonly registrationValues = signal<Record<string, string>>({});
+  readonly registrationEmail = signal('');
   readonly resendSeconds = signal(0);
   readonly savedPayload = signal<ClaimStartPayload | null>(null);
 
@@ -52,6 +57,7 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
     const invitedEmail = this.route.snapshot.queryParamMap.get('email');
     if (invitedEmail) {
       this.form.controls.email.setValue(invitedEmail);
+      this.loadRegistrationForm();
     }
   }
 
@@ -69,6 +75,16 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
     this.form.controls.email.markAsTouched();
 
     if (this.form.controls.firstName.invalid || this.form.controls.lastName.invalid || this.form.controls.phone.invalid || this.form.controls.email.invalid) {
+      return;
+    }
+
+    const currentEmail = this.form.controls.email.value.trim().toLowerCase();
+    if (this.registrationEmail() !== currentEmail) {
+      this.loadRegistrationForm(() => this.submitDetails());
+      return;
+    }
+
+    if (!this.validateRegistrationFields()) {
       return;
     }
 
@@ -138,6 +154,56 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
     this.errorMessage.set(null);
   }
 
+  loadRegistrationForm(afterLoad?: () => void): void {
+    const email = this.form.controls.email.value.trim().toLowerCase();
+    if (!email || this.form.controls.email.invalid) {
+      this.registrationFields.set([]);
+      this.registrationValues.set({});
+      this.registrationEmail.set('');
+      return;
+    }
+
+    this.registrationLoading.set(true);
+    this.api.loadRegistrationForm(email).subscribe({
+      next: (response) => {
+        const fields = (response.fields || []).filter((field) => field.key && field.label);
+        this.registrationFields.set(fields);
+        const current = this.registrationValues();
+        const next: Record<string, string> = {};
+        for (const field of fields) {
+          next[field.key] = current[field.key] ?? '';
+        }
+        this.registrationValues.set(next);
+        this.registrationEmail.set(email);
+        this.registrationLoading.set(false);
+        afterLoad?.();
+      },
+      error: () => {
+        this.registrationFields.set([]);
+        this.registrationValues.set({});
+        this.registrationEmail.set(email);
+        this.registrationLoading.set(false);
+        afterLoad?.();
+      }
+    });
+  }
+
+  registrationValue(key: string): string {
+    return this.registrationValues()[key] ?? '';
+  }
+
+  setRegistrationValue(key: string, value: string | boolean): void {
+    this.registrationValues.set({
+      ...this.registrationValues(),
+      [key]: typeof value === 'boolean' ? String(value) : value
+    });
+  }
+
+  isChecked(key: string): boolean {
+    const value = this.registrationValue(key);
+    return value === 'true' || value === '1' || value.toLowerCase() === 'yes';
+  }
+
   resendLabel(): string {
     return this.resendSeconds() > 0
       ? this.text('claim.form.resendWait', 'Resend available in {seconds}s', { seconds: this.resendSeconds() })
@@ -154,8 +220,33 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
       firstName: this.form.controls.firstName.value.trim(),
       lastName: this.form.controls.lastName.value.trim(),
       phone: this.form.controls.phone.value.trim(),
-      email: this.form.controls.email.value.trim().toLowerCase()
+      email: this.form.controls.email.value.trim().toLowerCase(),
+      registrationAnswers: this.registrationFields().map((field) => ({
+        key: field.key,
+        value: this.registrationValue(field.key)
+      }))
     };
+  }
+
+  private validateRegistrationFields(): boolean {
+    for (const field of this.registrationFields()) {
+      const value = this.registrationValue(field.key);
+      if (!field.required) {
+        continue;
+      }
+
+      if ((field.type === 'checkbox' || field.type === 'consent') && !this.isChecked(field.key)) {
+        this.errorMessage.set(`${field.label} is required.`);
+        return false;
+      }
+
+      if (field.type !== 'checkbox' && field.type !== 'consent' && !value.trim()) {
+        this.errorMessage.set(`${field.label} is required.`);
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private startCountdown(): void {

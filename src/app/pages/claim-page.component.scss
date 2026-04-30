@@ -107,7 +107,8 @@ h1 {
   visibility: visible;
 }
 
-.field input {
+.field input,
+.field select {
   width: 100%;
   padding: 14px 16px;
   border: 1px solid rgba(121, 138, 189, 0.2);
@@ -121,10 +122,42 @@ h1 {
   color: rgba(245, 240, 226, 0.36);
 }
 
-.field input:focus {
+.field input:focus,
+.field select:focus {
   outline: none;
   border-color: rgba(200, 166, 105, 0.65);
   box-shadow: 0 0 0 3px rgba(200, 166, 105, 0.12);
+}
+
+.field select {
+  color-scheme: dark;
+}
+
+.checkbox-field {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid rgba(121, 138, 189, 0.2);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-ink-soft);
+  line-height: 1.5;
+}
+
+.checkbox-field input {
+  width: auto;
+  margin-top: 3px;
+  accent-color: var(--color-gold);
+}
+
+.registration-loading {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  border: 1px dashed rgba(200, 166, 105, 0.35);
+  border-radius: 16px;
+  color: var(--color-ink-soft);
+  background: rgba(200, 166, 105, 0.08);
 }
 
 .field small {
