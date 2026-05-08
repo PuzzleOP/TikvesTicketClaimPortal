@@ -3,6 +3,8 @@ export interface ClaimStartPayload {
   lastName: string;
   phone: string;
   email: string;
+  eventId?: string;
+  acceptedTerms?: boolean;
   registrationAnswers?: ClaimRegistrationAnswer[];
 }
 
@@ -27,6 +29,7 @@ export interface ClaimRegistrationAnswer {
 
 export interface ClaimRegistrationFormResponse {
   fields: ClaimRegistrationQuestion[];
+  requiresTermsAcceptance?: boolean;
 }
 
 export interface ClaimAuthResponse {

@@ -35,6 +35,9 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
   readonly registrationFields = signal<ClaimRegistrationQuestion[]>([]);
   readonly registrationValues = signal<Record<string, string>>({});
   readonly registrationEmail = signal('');
+  readonly eventId = signal<string | null>(null);
+  readonly requiresTermsAcceptance = signal(false);
+  readonly acceptedTerms = signal(false);
   readonly resendSeconds = signal(0);
   readonly savedPayload = signal<ClaimStartPayload | null>(null);
 
@@ -54,6 +57,8 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
       return;
     }
 
+    const scopedEventId = this.route.snapshot.queryParamMap.get('eventId')?.trim() || null;
+    this.eventId.set(scopedEventId);
     const invitedEmail = this.route.snapshot.queryParamMap.get('email');
     if (invitedEmail) {
       this.form.controls.email.setValue(invitedEmail);
@@ -160,14 +165,21 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
       this.registrationFields.set([]);
       this.registrationValues.set({});
       this.registrationEmail.set('');
+      this.requiresTermsAcceptance.set(false);
+      this.acceptedTerms.set(false);
       return;
     }
 
     this.registrationLoading.set(true);
-    this.api.loadRegistrationForm(email).subscribe({
+    const previousEmail = this.registrationEmail();
+    this.api.loadRegistrationForm(email, this.eventId()).subscribe({
       next: (response) => {
         const fields = (response.fields || []).filter((field) => field.key && field.label);
         this.registrationFields.set(fields);
+        this.requiresTermsAcceptance.set(response.requiresTermsAcceptance === true);
+        if (response.requiresTermsAcceptance !== true || previousEmail !== email) {
+          this.acceptedTerms.set(false);
+        }
         const current = this.registrationValues();
         const next: Record<string, string> = {};
         for (const field of fields) {
@@ -182,6 +194,8 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
         this.registrationFields.set([]);
         this.registrationValues.set({});
         this.registrationEmail.set(email);
+        this.requiresTermsAcceptance.set(false);
+        this.acceptedTerms.set(false);
         this.registrationLoading.set(false);
         afterLoad?.();
       }
@@ -221,6 +235,8 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
       lastName: this.form.controls.lastName.value.trim(),
       phone: this.form.controls.phone.value.trim(),
       email: this.form.controls.email.value.trim().toLowerCase(),
+      eventId: this.eventId() || undefined,
+      acceptedTerms: this.acceptedTerms(),
       registrationAnswers: this.registrationFields().map((field) => ({
         key: field.key,
         value: this.registrationValue(field.key)
@@ -244,6 +260,11 @@ export class ClaimPageComponent implements OnInit, OnDestroy {
         this.errorMessage.set(`${field.label} is required.`);
         return false;
       }
+    }
+
+    if (this.requiresTermsAcceptance() && !this.acceptedTerms()) {
+      this.errorMessage.set(this.text('claim.form.termsRequired', 'Accepting the event terms is required.'));
+      return false;
     }
 
     return true;

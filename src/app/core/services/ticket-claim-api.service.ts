@@ -15,10 +15,10 @@ export class TicketClaimApiService {
     return this.http.post<void>(`${this.apiBaseUrl}/api/v1.0/tikves/public/ticket-claim/start`, payload);
   }
 
-  loadRegistrationForm(email: string): Observable<ClaimRegistrationFormResponse> {
+  loadRegistrationForm(email: string, eventId?: string | null): Observable<ClaimRegistrationFormResponse> {
     return this.http.post<ClaimRegistrationFormResponse>(
       `${this.apiBaseUrl}/api/v1.0/tikves/public/ticket-claim/form`,
-      { email }
+      { email, eventId: eventId || undefined }
     );
   }
 

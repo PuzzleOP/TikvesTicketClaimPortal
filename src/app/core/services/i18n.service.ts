@@ -27,6 +27,9 @@ type TranslationKey =
   | 'claim.form.back'
   | 'claim.form.resend'
   | 'claim.form.resendWait'
+  | 'claim.form.termsLabel'
+  | 'claim.form.termsHint'
+  | 'claim.form.termsRequired'
   | 'claim.form.sentHeadline'
   | 'claim.form.sentBody'
   | 'claim.form.invalidCode'
@@ -82,6 +85,9 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'claim.form.back': 'Edit details',
     'claim.form.resend': 'Request new code',
     'claim.form.resendWait': 'Resend available in {seconds}s',
+    'claim.form.termsLabel': 'I accept the event terms and conditions.',
+    'claim.form.termsHint': 'Required for this event before tickets can be released.',
+    'claim.form.termsRequired': 'Accepting the event terms is required.',
     'claim.form.sentHeadline': 'Check your inbox',
     'claim.form.sentBody': 'A six-digit verification code was sent to {email}. Enter it below to unlock your ticket wallet.',
     'claim.form.invalidCode': 'The code is invalid or expired. Request a new code and try again.',
@@ -136,6 +142,9 @@ const translations: Record<Language, Record<TranslationKey, string>> = {
     'claim.form.back': 'Измени податоци',
     'claim.form.resend': 'Побарај нов код',
     'claim.form.resendWait': 'Повторно праќање за {seconds}s',
+    'claim.form.termsLabel': 'Ги прифаќам условите за настанот.',
+    'claim.form.termsHint': 'Потребно е за овој настан пред да се ослободат билетите.',
+    'claim.form.termsRequired': 'Прифаќањето на условите за настанот е задолжително.',
     'claim.form.sentHeadline': 'Проверете ја вашата е-пошта',
     'claim.form.sentBody': 'Шестцифрен код е испратен на {email}. Внесете го подолу за да го отклучите вашиот билетски паричник.',
     'claim.form.invalidCode': 'Кодот е невалиден или истечен. Побарајте нов код и обидете се повторно.',

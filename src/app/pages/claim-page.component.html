@@ -94,6 +94,19 @@
           </label>
         </ng-container>
 
+        <label class="field field-full" *ngIf="requiresTermsAcceptance()">
+          <span class="field-label">{{ text('claim.form.termsHint', 'Required for this event before tickets can be released.') }}</span>
+          <span class="checkbox-field">
+            <input
+              type="checkbox"
+              [ngModel]="acceptedTerms()"
+              [ngModelOptions]="{ standalone: true }"
+              (ngModelChange)="acceptedTerms.set($event)"
+            />
+            <span>{{ text('claim.form.termsLabel', 'I accept the event terms and conditions.') }}</span>
+          </span>
+        </label>
+
         <button class="primary-button" type="submit" [disabled]="isSubmitting()">
           <span>{{ isSubmitting() ? text('claim.form.submit', 'Send verification code') + '...' : text('claim.form.submit', 'Send verification code') }}</span>
         </button>
@@ -125,6 +138,10 @@
           <div *ngFor="let field of registrationFields()">
             <span>{{ field.label }}</span>
             <strong>{{ registrationValue(field.key) || '-' }}</strong>
+          </div>
+          <div *ngIf="savedPayload()?.acceptedTerms">
+            <span>{{ text('claim.form.termsHint', 'Required for this event before tickets can be released.') }}</span>
+            <strong>{{ text('claim.form.termsLabel', 'I accept the event terms and conditions.') }}</strong>
           </div>
         </div>
 
